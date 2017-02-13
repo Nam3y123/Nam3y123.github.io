@@ -109,8 +109,9 @@ public class Ship extends Actor implements Entity{
     public void act(float delta) {
         super.act(delta);
         moving = !(oldPos[0] == getX() && oldPos[1] == getY());
-        if(!moving && !shopping && vulnerable)
-            moveBy(0, -3);
+        // Causes player to be blown back when not moving. Uncomment if you are a horrible person and want Stage 2 to be unbearable.
+        /*if(!moving && !shopping && vulnerable)
+            moveBy(0, -3);*/
         if(!shopping && vulnerable) {
             if(getY() < 72)
                 setPosition(getX(), 72);
@@ -133,6 +134,8 @@ public class Ship extends Actor implements Entity{
             invin--;
         oldPos[0] = getX();
         oldPos[1] = getY();
+        if(!vulnerable)
+            hp = 3;
         stoHp = hp;
         if(!shopping)
             checkCollision();

@@ -28,7 +28,7 @@ public class EyeBlasterBoss extends Enemy {
     private int simultaneousSweep, fireAtksUsed;
 
     /*
-    -----------------------
+    ----------------------
     |atk values|attack    |
     |0         |Side Sweep|
     |1         |Shoot-Off |

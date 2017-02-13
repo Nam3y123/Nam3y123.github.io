@@ -98,7 +98,7 @@ public class Projectile extends Actor implements Entity {
 
     @Override
     public void onHit(Entity offender) {
-        if(!(offender instanceof Projectile))
+        if(!(offender instanceof Projectile) && (!(offender instanceof Enemy) || ((Enemy)offender).getVulnerable()))
             remove();
     }
 

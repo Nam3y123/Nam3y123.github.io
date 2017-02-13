@@ -496,13 +496,28 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 					}
 					break;
 				case 1:
-					if(frames >= 45 && (frames % 60 == 0 || frames % 60 == 10)) {
-						//mainGroup.addActor(new Laser((int)player.getX() + 24, (int)player.getY() + 24));
+					if(frames == 45)
+						mainGroup.addActor(new FlyingBoss(1));
+					if((frames >= 145 && (frames < 1200 || frames >= 1750) && (frames < 4650 || (frames > 5300 && frames
+							% 480 < 420))) && (frames % 60 == 0)) {
+						mainGroup.addActor(new Laser((int)player.getX() + 24, (int)player.getY() + 24));
 					}
-					if(frames > 150 && frames < 5000 && spawnTimes[0] == 0) {
+					if(frames > 1250 && frames < 3250 && spawnTimes[0] == 0) {
 						mainGroup.addActor(new ShieldShip(generator.nextInt(714), 714 - generator.nextInt(144)));
-						spawnTimes[0] = 45 + generator.nextInt(50);
-						//spawnTimes[0] = 15; // This is just for fun. If this is commented out, DON'T UNCOMMENT IT.
+						spawnTimes[0] = 200 + generator.nextInt(50);
+					}
+					if(frames > 3250 && frames < 4650 && spawnTimes[0] == 0) {
+						mainGroup.addActor(new ShieldLoanShip(generator.nextInt(714), 714 - generator.nextInt(144)));
+						spawnTimes[0] = 175 + generator.nextInt(50);
+					}
+					if(frames > 400 && frames < 1050 && spawnTimes[1] == 0) {
+						mainGroup.addActor(new CannonShip(generator.nextInt(768), 714 - generator.nextInt(144)));
+						spawnTimes[1] = 175 + generator.nextInt(50);
+					}
+					if(frames >= 4650 && frames <= 4750 && frames % 50 == 0)
+						mainGroup.addActor(new ShieldShip(303 + ((frames - 4650) / 50 * 54), 512 + ((frames - 4450) / 50 * 54)));
+					if(frames == 5150) {
+						mainGroup.addActor(new LaserBoss(192, 384));
 					}
 					break;
 			}

@@ -15,7 +15,9 @@ public class Star extends Projectile {
     boolean gravitate;
 
     public Star(float x, float y) {
-        super(x, y, 33, 33, 270, 10, 0, 120, 0);
+        super(x, y, 11, 11, 270, 10, 0, 120, 0);
+        spr.setSize(33, 33);
+        setBounds(x, y, 33, 33);
         SnapshotArray<Actor> actors = new SnapshotArray<Actor>(group.getChildren());
         for(Actor a : actors)
             if(a instanceof Ship)

@@ -15,6 +15,7 @@ public class Enemy extends Actor implements Entity {
     protected Sprite spr;
     protected int invinDur;
     protected int age;
+    protected boolean vulnerable;
 
     public final static Texture region = new Texture(Gdx.files.internal("Enemies.png"));
     public static Ship player;
@@ -26,6 +27,7 @@ public class Enemy extends Actor implements Entity {
         hp = 3;
         invinDur = 0;
         age = 0;
+        vulnerable = true;
         spr = new Sprite(region);
         spr.setBounds(x, y, 48, 48);
         spr.setRegion(0, 0, 16, 16);
@@ -79,5 +81,9 @@ public class Enemy extends Actor implements Entity {
                 Enemy.this.remove();
             }
         }
+    }
+
+    public boolean getVulnerable() {
+        return vulnerable;
     }
 }

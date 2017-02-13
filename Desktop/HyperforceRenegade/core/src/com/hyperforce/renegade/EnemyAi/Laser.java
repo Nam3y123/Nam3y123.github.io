@@ -11,31 +11,45 @@ public class Laser extends Enemy {
 
     public Laser(int x, int y) {
         super(x, y);
+        setBounds(x, y, 0, 0);
+        vulnerable = false;
         width = 10;
         duration = 52;
         vertical = GENERATOR.nextBoolean();
+        //vertical = true;
     }
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
         if(duration <= 7) {
             spr.setRegion(134, 0, 12, 12);
+            spr.setRotation(0);
             spr.setSize(768, 6 * (duration - 1));
+            spr.setRotation(vertical ? 90 : 0);
             spr.setOriginCenter();
-            spr.setX(0);
-            spr.setY(getY() - spr.getHeight() / 2);
+            spr.setX(vertical ? getX() - 354: 0);
+            spr.setY(vertical ? 384 : getY() - spr.getHeight() / 2);
             spr.draw(batch);
         } else {
-            spr.setRotation(0);
+            spr.setRotation(vertical ? 90 : 0);
             spr.setRegion(104, 0, 30, 10);
             spr.setSize(90, 30);
             spr.setOriginCenter();
-            spr.setX(getX() - spr.getWidth() / 2);
-            spr.setY(getY() + 36 - spr.getHeight() / 2 + width);
+            if(vertical) {
+                spr.setX(getX() - 36 - spr.getHeight() / 2 - width);
+                spr.setY(getY() - spr.getWidth() / 2);
+            } else {
+                spr.setX(getX() - spr.getWidth() / 2);
+                spr.setY(getY() + 36 - spr.getHeight() / 2 + width);
+            }
+
             spr.draw(batch);
 
             spr.rotate(180);
-            spr.translate(0, -72 - width * 2);
+            if(vertical)
+                spr.translate(72 + width * 2, 0);
+            else
+                spr.translate(0, -72 - width * 2);
             spr.draw(batch);
         }
 
@@ -55,8 +69,14 @@ public class Laser extends Enemy {
         }
         if(duration <= 7) {
             int height = 6 * (duration - 1);
-            if(player.getY() + player.getHeight() > getY() - height / 2 && player.getY() < getY() + height / 2)
-                player.setHp(player.getHp() - 1);
+            if(vertical) {
+                if(player.getX() + player.getWidth() > getX() - height / 2 + 30 && player.getX() < getX() + height / 2 + 30)
+                    player.setHp(player.getHp() - 1);
+            } else {
+                if(player.getY() + player.getHeight() > getY() - height / 2 && player.getY() < getY() + height / 2)
+                    player.setHp(player.getHp() - 1);
+            }
+
         }
     }
 
