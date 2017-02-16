@@ -18,8 +18,8 @@ public class Secret extends ApplicationAdapter {
     }
 
     public void render() {
-        if((float)Math.pow(3, duration / 1000f) - 0.95f < 100f)
-            mus.setPitch(id, ((float)Math.pow(3, duration / 1000f) - 0.95f));
+        if((float)Math.pow(1.5, duration / 1000f) - 0.95f < 100f)
+            mus.setPitch(id, ((float)Math.pow(1.5, duration / 1000f) - 0.95f));
         duration++;
     }
 

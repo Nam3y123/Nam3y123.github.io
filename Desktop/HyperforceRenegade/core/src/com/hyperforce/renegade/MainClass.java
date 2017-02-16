@@ -15,13 +15,17 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction;
+import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.SnapshotArray;
 import com.hyperforce.renegade.EnemyAi.*;
 import com.hyperforce.renegade.ProjectileAi.*;
@@ -85,7 +89,7 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 		curMenu = 0;
 		superCd = 0;
 		supernova = 0;
-		level = 1;
+		level = 2;
 		Ship.shopping = false;
 
 		soundtrack = new Music[3];
@@ -520,6 +524,11 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 						mainGroup.addActor(new LaserBoss(192, 384));
 					}
 					break;
+				case 2:
+					if(frames == 45) {
+						mainGroup.addActor(new ParryShip(384, 384));
+					}
+
 			}
 
 			if(player.getInvin() <= 25 || PowerupSphere.yellowPowerDur > 0)
@@ -587,8 +596,13 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 					}
 				})));
 				for(Actor a : mainGroup.getChildren())
-					if(a instanceof Enemy)
+					if(a instanceof Enemy) {
+						Array<Action> actionses = new Array<>(a.getActions());
+						for(Action act : actionses)
+							if(act instanceof MoveToAction || act instanceof MoveByAction)
+								a.removeAction(act);
 						a.addAction(Actions.moveBy(0, -768, 1f));
+					}
 			}
 		}
 
