@@ -67,8 +67,8 @@ public class Projectile extends Actor implements Entity {
         checkCollision();
         moveBy(speed * (float)Math.cos(Math.toRadians(dir)), speed * (float)Math.sin(Math.toRadians(dir)));
         spr.setPosition(getX(), getY());
-        if(getX() < -getWidth() || getY() < -getHeight() || getX() > 768 ||
-                getY() > 768)
+        if(getX() < -getWidth() - 384 || getY() < -getHeight() - 384 || getX() > 1152 ||
+                getY() > 1152)
             this.remove();
         age++;
     }

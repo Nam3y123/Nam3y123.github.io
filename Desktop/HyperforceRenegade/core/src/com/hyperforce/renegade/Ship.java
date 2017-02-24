@@ -143,8 +143,10 @@ public class Ship extends Actor implements Entity{
             long id = sounds[4].play();
             sounds[4].setVolume(id, Ship.volume / 50f);
             lives--;
-            hp = 3;
-            stoHp = 3;
+            if(lives > 0) {
+                hp = 3;
+                stoHp = 3;
+            }
             alive = false;
             vulnerable = false;
             invin = (int)(0.75f / Gdx.graphics.getDeltaTime());

@@ -52,6 +52,8 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 	private int supernova;
 	private int level;
 	public static int songPlaying;
+	private LargeShip stage3Ship;
+	private boolean gameStart;
 
 	private final Random generator = new Random();
 
@@ -89,8 +91,10 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 		curMenu = 0;
 		superCd = 0;
 		supernova = 0;
-		level = 2;
+		level = 0;
+		stage3Ship = null;
 		Ship.shopping = false;
+		gameStart = false;
 
 		soundtrack = new Music[3];
 		soundtrack[0] = Gdx.audio.newMusic(Gdx.files.internal("SFX/Music/StageTheme1.mp3"));
@@ -101,7 +105,7 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 			soundtrack[0].setLooping(true);
         });
 		for(int i = 0; i < soundtrack.length; i++)
-			soundtrack[i].setVolume(1f);
+			soundtrack[i].setVolume(Ship.volume / 50f);
 
 		Actor background = new Actor() {
 			private final TextureRegion letters = new TextureRegion(new Texture(Gdx.files.internal("Backdrop.png")));
@@ -259,6 +263,13 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 				if(PowerupSphere.greenPowerDur > 0) {
 					setText("0ERR.OR km");
 					setColor(Color.RED);
+				}
+				else if(frames >= 5150 || (stage3Ship != null && stage3Ship.inBossFight())) {
+					setText("BOSS");
+					setColor(Color.RED);
+					if(stage3Ship != null && stage3Ship.isDefeated()) {
+						frames = 2499;
+					}
 				}
 				else if(!Ship.shopping)
 					setText(String.format("%04d.%d km", frames, generator.nextInt(89) + 10));
@@ -525,8 +536,29 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 					}
 					break;
 				case 2:
-					if(frames == 45) {
-						mainGroup.addActor(new ParryShip(384, 384));
+					/*if(frames >= 45 && spawnTimes[0] == 0) { // These enemies are way too hard to deal with alongside the LargeShip
+						if(frames == 45)
+							mainGroup.addActor(new ParryShip(384, 912));
+						else
+							mainGroup.addActor(new ParryShip(generator.nextInt(768), 912));
+						spawnTimes[0] = 500;
+					}*/
+					/*if(frames > 10 && frames < 5000 && spawnTimes[0] == 0) {
+						mainGroup.addActor(new CannonShip(generator.nextInt(768), 512 - generator.nextInt(144)));
+						spawnTimes[0] = 175 + generator.nextInt(50);
+					}
+					if(frames > 45 && frames < 5000 && spawnTimes[1] == 0) {
+						int ofs = 512 - generator.nextInt(144);
+						mainGroup.addActor(new EyeBlaster(ofs));
+						spawnTimes[1] = 75 + generator.nextInt(100);
+					}
+					if(frames > 250 && frames < 5000 && spawnTimes[2] == 0) {
+						int ofs = 512 - generator.nextInt(144);
+						mainGroup.addActor(new MysteryShip(ofs));
+						spawnTimes[2] = 400;
+					}*/
+					if(frames == 50) {
+						stage3Ship = new LargeShip(192, 1152); // LargeShip adds itself to the group
 					}
 
 			}
@@ -546,7 +578,7 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 					momentum[0] += (Ship.speed / 4);
 				}
 
-			if(!Ship.shopping)
+			if(!Ship.shopping && gameStart)
 				frames++;
 			if(cooldown > 0)
 				cooldown--;
@@ -579,30 +611,34 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 					spawnTimes[i]--;
 
 			if((frames == 2500 || frames == 5000) && !Ship.shopping) {
-				Ship.shopping = true;
-				player.addAction(Actions.sequence(Actions.moveBy(0, -128, .5f), Actions.moveBy(0, 1024, 1f), Actions.run(new Runnable() {
-					@Override
-					public void run() {
-						for(Actor a : mainGroup.getChildren())
-							if(a instanceof Enemy || a instanceof Projectile)
-								a.remove();
-						mainGame.addAction(Actions.sequence(Actions.moveBy(0, 768, 0.75f), Actions.run(new Runnable() {
-							@Override
-							public void run() {
-								curStage = shop;
-								shopSel = 0;
-							}
-						})));
-					}
-				})));
-				for(Actor a : mainGroup.getChildren())
-					if(a instanceof Enemy) {
-						Array<Action> actionses = new Array<>(a.getActions());
-						for(Action act : actionses)
-							if(act instanceof MoveToAction || act instanceof MoveByAction)
-								a.removeAction(act);
-						a.addAction(Actions.moveBy(0, -768, 1f));
-					}
+				if(stage3Ship == null || stage3Ship.isDefeated()) {
+					Ship.shopping = true;
+					player.addAction(Actions.sequence(Actions.moveBy(0, -128, .5f), Actions.moveBy(0, 1024, 1f), Actions.run(new Runnable() {
+						@Override
+						public void run() {
+							for(Actor a : mainGroup.getChildren())
+								if(a instanceof Enemy || a instanceof Projectile)
+									a.remove();
+							mainGame.addAction(Actions.sequence(Actions.moveBy(0, 768, 0.75f), Actions.run(new Runnable() {
+								@Override
+								public void run() {
+									curStage = shop;
+									shopSel = 0;
+								}
+							})));
+						}
+					})));
+					for(Actor a : mainGroup.getChildren())
+						if(a instanceof Enemy) {
+							Array<Action> actionses = new Array<>(a.getActions());
+							for(Action act : actionses)
+								if(act instanceof MoveToAction || act instanceof MoveByAction)
+									a.removeAction(act);
+							a.addAction(Actions.moveBy(0, -768, 1f));
+						}
+				} else {
+					stage3Ship.mainFight();
+				}
 			}
 		}
 
@@ -627,19 +663,27 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 	@Override
 	public boolean keyDown(int keycode) {
 		switch (keycode) {
+			case Input.Keys.W:
 			case Input.Keys.UP:
 				btnDown[0] = true;
 				if(shopSel > 0)
 					shopSel--;
 				return true;
+			case Input.Keys.S:
+				if(btnDown[5])
+					frames = ((frames / 2500) + 1) * 2500 - 1;
 			case Input.Keys.DOWN:
 				btnDown[1] = true;
 				if(shopSel < 4)
 					shopSel++;
 				return true;
+			case Input.Keys.A:
+				if(btnDown[5])
+					Ship.stars += 10;
 			case Input.Keys.LEFT:
 				btnDown[2] = true;
 				return true;
+			case Input.Keys.D:
 			case Input.Keys.RIGHT:
 				btnDown[3] = true;
 				return true;
@@ -654,8 +698,18 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 							Ship.stars -= (shopSel + 1) * 10;
 							long id = Ship.sounds[9].play();
 							Ship.sounds[9].setVolume(id, Ship.volume / 100f);
+							if(curMenu == 0) {
+								if(shopSel == 0) {
+									Ship.lives++;
+									if(Ship.lives > 4) {
+										Ship.lives = 4;
+										Ship.stars += 10;
+									}
+								}
+							} else {
+								Ship.upgrades[curMenu][shopSel] = true;
+							}
 						}
-						Ship.upgrades[curMenu][shopSel] = true;
 						if(curMenu == 2)
 							bomb = (short)shopSel;
 					}
@@ -713,20 +767,16 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 					frames++;
 					player.setPosition(360, 144);
 					player.setHp(3);
+					if(stage3Ship != null) {
+						stage3Ship.die();
+						stage3Ship = null;
+					}
 					mainGame.getRoot().addAction(Actions.sequence(Actions.moveBy(0, -768, 0.75f), Actions.run(() ->
 							Ship.shopping = false)));
 				}
 				return true;
 			case Input.Keys.SHIFT_RIGHT:
 				btnDown[5] = true;
-				return true;
-			case Input.Keys.A:
-				if(btnDown[5])
-					Ship.stars += 10;
-				return true;
-			case Input.Keys.S:
-				if(btnDown[5])
-					frames = ((frames / 2500) + 1) * 2500 - 1;
 				return true;
 			case Input.Keys.ENTER:
 				if(!mainGroup.getChildren().contains(player, false)) {
@@ -745,6 +795,7 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
                     })));
 					mainGroup.addActor(player);
 					frames = -84;
+					gameStart = true;
 					return true;
 				} else
 					return false;
@@ -763,15 +814,19 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 	@Override
 	public boolean keyUp(int keycode) {
 		switch (keycode) {
+			case Input.Keys.W:
 			case Input.Keys.UP:
 				btnDown[0] = false;
 				return true;
+			case Input.Keys.S:
 			case Input.Keys.DOWN:
 				btnDown[1] = false;
 				return true;
+			case Input.Keys.A:
 			case Input.Keys.LEFT:
 				btnDown[2] = false;
 				return true;
+			case Input.Keys.D:
 			case Input.Keys.RIGHT:
 				btnDown[3] = false;
 				return true;
