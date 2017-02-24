@@ -776,7 +776,7 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 				}
 				return true;
 			case Input.Keys.SHIFT_RIGHT:
-				btnDown[5] = true;
+				//btnDown[5] = true;
 				return true;
 			case Input.Keys.ENTER:
 				if(!mainGroup.getChildren().contains(player, false)) {
