@@ -6,9 +6,13 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.hyperforce.renegade.ProjectileAi.BasicLaser;
+import com.hyperforce.renegade.ProjectileAi.Explosion;
+import com.hyperforce.renegade.ProjectileAi.GigaBomb;
 import com.hyperforce.renegade.ProjectileAi.Star;
 
 import java.util.Random;
+
+import static com.hyperforce.renegade.Projectile.group;
 
 public class Enemy extends Actor implements Entity {
     protected int hp;
@@ -75,6 +79,9 @@ public class Enemy extends Actor implements Entity {
                         if(player.getHp() < 3)
                             player.setHp(player.getHp() + 1);
                     }
+                }
+                if(Ship.upgrades[1][4]) {
+                    group.addActor(new Explosion(getX() + getWidth() / 2, getY() + getHeight() / 2));
                 }
                 Ship.score += 500;
                 getParent().addActor(new Star(getX(), getY()));

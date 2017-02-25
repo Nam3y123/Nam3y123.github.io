@@ -68,9 +68,9 @@ public class EyeBlaster extends Enemy {
         if(age == 64) {
             float cannonX = getX() + 12 + (float)(Math.cos(Math.toRadians(finalDir)) * 24);
             float cannonY = getY() + 12 + (float)(Math.sin(Math.toRadians(finalDir)) * 24);
-            getParent().addActor(new Projectile(cannonX, cannonY, 24, 24, finalDir, 18, 0, 96, 1));
-            getParent().addActor(new Projectile(cannonX, cannonY, 24, 24, finalDir - 30, 18, 0, 96, 1));
-            getParent().addActor(new Projectile(cannonX, cannonY, 24, 24, finalDir + 30, 18, 0, 96, 1));
+            getParent().addActor(new Projectile(cannonX, cannonY, 24, 24, finalDir, 16, 0, 96, 1));
+            getParent().addActor(new Projectile(cannonX, cannonY, 24, 24, finalDir - 30, 16, 0, 96, 1));
+            getParent().addActor(new Projectile(cannonX, cannonY, 24, 24, finalDir + 30, 16, 0, 96, 1));
         }
         if(age == 128)
             remove();

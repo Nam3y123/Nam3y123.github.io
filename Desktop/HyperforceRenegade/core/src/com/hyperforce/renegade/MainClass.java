@@ -91,10 +91,11 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 		curMenu = 0;
 		superCd = 0;
 		supernova = 0;
-		level = 0;
+		level = 2;
 		stage3Ship = null;
 		Ship.shopping = false;
 		gameStart = false;
+		Ship.bossDead = false;
 
 		soundtrack = new Music[3];
 		soundtrack[0] = Gdx.audio.newMusic(Gdx.files.internal("SFX/Music/StageTheme1.mp3"));
@@ -105,7 +106,7 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 			soundtrack[0].setLooping(true);
         });
 		for(int i = 0; i < soundtrack.length; i++)
-			soundtrack[i].setVolume(Ship.volume / 50f);
+			soundtrack[i].setVolume(0.5f);
 
 		Actor background = new Actor() {
 			private final TextureRegion letters = new TextureRegion(new Texture(Gdx.files.internal("Backdrop.png")));
@@ -513,8 +514,10 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 				case 1:
 					if(frames == 45)
 						mainGroup.addActor(new FlyingBoss(1));
-					if((frames >= 145 && (frames < 1200 || frames >= 1750) && (frames < 4650 || (frames > 5300 && frames
-							% 480 < 420))) && (frames % 60 == 0)) {
+					if((frames >= 145 && (frames < 1200 || frames >= 1750) && frames < 4650) && (frames % 60 == 0)) {
+						mainGroup.addActor(new Laser((int)player.getX() + 24, (int)player.getY() + 24));
+					}
+					if(frames >= 5250 && (frames % (35 + Ship.bossHealth) == 0)) {
 						mainGroup.addActor(new Laser((int)player.getX() + 24, (int)player.getY() + 24));
 					}
 					if(frames > 1250 && frames < 3250 && spawnTimes[0] == 0) {
@@ -543,24 +546,28 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 							mainGroup.addActor(new ParryShip(generator.nextInt(768), 912));
 						spawnTimes[0] = 500;
 					}*/
-					/*if(frames > 10 && frames < 5000 && spawnTimes[0] == 0) {
-						mainGroup.addActor(new CannonShip(generator.nextInt(768), 512 - generator.nextInt(144)));
-						spawnTimes[0] = 175 + generator.nextInt(50);
+					if(stage3Ship == null || !stage3Ship.inBossFight()) {
+						if(frames > 10 && frames < 5000 && spawnTimes[0] == 0) {
+							mainGroup.addActor(new CannonShip(generator.nextInt(768), 512 - generator.nextInt(144)));
+							spawnTimes[0] = 175 + generator.nextInt(50);
+						}
+						if(frames > 45 && frames < 5000 && spawnTimes[1] == 0) {
+							int ofs = 512 - generator.nextInt(144);
+							mainGroup.addActor(new EyeBlaster(ofs));
+							spawnTimes[1] = 75 + generator.nextInt(100);
+						}
+						if(frames > 250 && frames < 5000 && spawnTimes[2] == 0) {
+							int ofs = 512 - generator.nextInt(144);
+							mainGroup.addActor(new MysteryShip(ofs));
+							spawnTimes[2] = 400;
+						}
 					}
-					if(frames > 45 && frames < 5000 && spawnTimes[1] == 0) {
-						int ofs = 512 - generator.nextInt(144);
-						mainGroup.addActor(new EyeBlaster(ofs));
-						spawnTimes[1] = 75 + generator.nextInt(100);
+					if(frames == 450) {
+						stage3Ship = new LargeShip(192, 1152, 0); // LargeShip adds itself to the group
 					}
-					if(frames > 250 && frames < 5000 && spawnTimes[2] == 0) {
-						int ofs = 512 - generator.nextInt(144);
-						mainGroup.addActor(new MysteryShip(ofs));
-						spawnTimes[2] = 400;
-					}*/
-					if(frames == 50) {
-						stage3Ship = new LargeShip(192, 1152); // LargeShip adds itself to the group
+					if(frames == 2700 && stage3Ship == null) {
+						stage3Ship = new LargeShip(192, 1152, 1); // Stage 2: Moves more erratically
 					}
-
 			}
 
 			if(player.getInvin() <= 25 || PowerupSphere.yellowPowerDur > 0)
@@ -610,9 +617,10 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 				if(spawnTimes[i] > 0)
 					spawnTimes[i]--;
 
-			if((frames == 2500 || frames == 5000) && !Ship.shopping) {
+			if((frames == 2500 || frames == 5000 || Ship.bossDead) && !Ship.shopping) {
 				if(stage3Ship == null || stage3Ship.isDefeated()) {
 					Ship.shopping = true;
+					Ship.scoreDouble = false;
 					player.addAction(Actions.sequence(Actions.moveBy(0, -128, .5f), Actions.moveBy(0, 1024, 1f), Actions.run(new Runnable() {
 						@Override
 						public void run() {
@@ -622,6 +630,10 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 							mainGame.addAction(Actions.sequence(Actions.moveBy(0, 768, 0.75f), Actions.run(new Runnable() {
 								@Override
 								public void run() {
+									Array<Actor> enemieses = mainGroup.getChildren();
+									for(Actor a : enemieses)
+										if(a instanceof Enemy || a instanceof Projectile)
+											mainGroup.removeActor(a);
 									curStage = shop;
 									shopSel = 0;
 								}
@@ -636,6 +648,11 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 									a.removeAction(act);
 							a.addAction(Actions.moveBy(0, -768, 1f));
 						}
+					if(Ship.bossDead) {
+						level++;
+						frames = 0;
+						Ship.bossDead = false;
+					}
 				} else {
 					stage3Ship.mainFight();
 				}
@@ -705,6 +722,12 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 										Ship.lives = 4;
 										Ship.stars += 10;
 									}
+								}
+								if(shopSel == 1) {
+									if(Ship.scoreDouble)
+										Ship.stars += 20;
+									else
+										Ship.scoreDouble = true;
 								}
 							} else {
 								Ship.upgrades[curMenu][shopSel] = true;
@@ -776,7 +799,7 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 				}
 				return true;
 			case Input.Keys.SHIFT_RIGHT:
-				//btnDown[5] = true;
+				btnDown[5] = true;
 				return true;
 			case Input.Keys.ENTER:
 				if(!mainGroup.getChildren().contains(player, false)) {

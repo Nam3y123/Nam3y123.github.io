@@ -48,7 +48,7 @@ public class AllyBlaster extends Enemy {
                     else
                         dir = (float)Math.PI;
                 }
-                getParent().addActor(new Projectile(getX() + 12, getY() + 12, 24, 24, (float)Math.toDegrees(dir), 48,
+                getParent().addActor(new Projectile(getX() + 12, getY() + 12, 24, 24, (float)Math.toDegrees(dir), 24,
                         253, 0, 2) {
                     @Override
                     public void checkCollision() {

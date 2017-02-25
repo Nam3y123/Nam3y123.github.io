@@ -1,7 +1,7 @@
 -Extra Life
-NOT IMPLEMENTED! Grants an extra life. (4 max)
--Repair Kit
-NOT IMPLEMENTED! Grants one extra hit point. (3 max)
+Grants an extra life. (4 max)
+-Score Multiplier
+Score is doubled until next visit to the shop.
 -Ship Upgrades
 Abilities that passively improve your ship. Press "Z" to open.
 -Secondary Attacks
@@ -18,7 +18,7 @@ Regenerates health after killing 3 enemies.
 -Regenerative Shield
 Grants an extra hit after avoiding damage for enough time.
 -Obliteration Field
-NOT IMPLEMENTED! Enemies explode upon being slain & damage other nearby enemies.
+Enemies explode upon being slain & damage other nearby enemies.
 !!!
 -Giga Bomb
 Moves forward a small amount & explodes.
@@ -29,7 +29,7 @@ Fires a large beam for 3 seconds after a delay.
 -Supernova
 Kills all non-boss enemies and your ship. Consumes one life.
 -Flame Turret
-NOT IMPLEMENTED! Creates a turret that fires at enemies for a while.
+Creates a turret that fires at enemies for a while.
 !!!
 -Gatling Laser
 Shots do less damage but fire much quicker.

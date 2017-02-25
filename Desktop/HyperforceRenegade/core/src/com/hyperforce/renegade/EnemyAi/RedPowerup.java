@@ -17,7 +17,7 @@ public class RedPowerup extends Enemy {
     public void act(float delta) {
         super.act(delta);
         setPosition(player.getX() + 16, player.getY() + 12);
-        if(age % 30 == 0) {
+        if(age % 30 == 0 && getParent() != null) {
             getParent().addActor(new Projectile(getX() + 3, getY() + 24, 9, 18, 90, 24, 244, 0, 1) {
                 @Override
                 public void onHit(Entity offender) {

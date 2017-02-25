@@ -31,6 +31,9 @@ public class Ship extends Actor implements Entity{
     public static int vampirism;
     public static int bossHealth, bossHealthMax;
     public static boolean alive;
+    public static boolean bossDead;
+    public static boolean scoreDouble;
+    private static int stoScore;
 
     public Ship(float x, float y) {
         super();
@@ -139,6 +142,9 @@ public class Ship extends Actor implements Entity{
         stoHp = hp;
         if(!shopping)
             checkCollision();
+        if(score != stoScore && scoreDouble)
+            score += score - stoScore;
+        stoScore = score;
         if(hp <= 0) {
             long id = sounds[4].play();
             sounds[4].setVolume(id, Ship.volume / 50f);

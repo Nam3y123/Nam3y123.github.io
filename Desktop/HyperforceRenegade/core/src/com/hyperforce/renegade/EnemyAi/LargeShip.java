@@ -20,8 +20,10 @@ public class LargeShip extends Enemy {
     private boolean bossFight;
     private float oldX, oldY;
     private boolean defeated;
+    private int amtExposed; // For the core opening animation
+    private int stage;
 
-    public LargeShip(int x, int y) {
+    public LargeShip(int x, int y, int stage) {
         super(x, y);
         spr.setRegion(0, 293, 128, 128);
         spr.setSize(384, 384);
@@ -40,6 +42,8 @@ public class LargeShip extends Enemy {
         oldY = y;
         bossFight = false;
         defeated = false;
+        amtExposed = 0;
+        this.stage = stage;
 
         group.addActorAt(1, this);
         for(SmallTurret t : turrets)
@@ -49,7 +53,10 @@ public class LargeShip extends Enemy {
 
     @Override
     public void act(float delta) {
-        super.act(delta * (float)(Math.sin(age / 30f) + 1.5f));
+        if(stage == 1)
+            super.act(delta * (float)(Math.sin(age / 30f) + 1.5f));
+        else
+            super.act(delta);
         if(age % 120 == 100)
             for(SmallTurret t : turrets)
                 t.prepareFireAnim();
@@ -87,7 +94,8 @@ public class LargeShip extends Enemy {
         for(Action a : actionses)
             if(a instanceof MoveToAction)
                 removeAction(a);
-        addAction(Actions.moveTo(192, 192, (float)Math.sqrt(Math.pow(getX() - 192, 2) + Math.pow(getY() - 192, 2)) / 256f));
+        addAction(Actions.sequence(Actions.moveTo(192, 192, (float)Math.sqrt(Math.pow(getX() - 192, 2) + Math.pow(getY()
+                - 192, 2)) / 256f), Actions.repeat(18, Actions.run(() -> amtExposed += 2))));
     }
 
     public boolean inBossFight() {
@@ -101,6 +109,8 @@ public class LargeShip extends Enemy {
     public void setDefeated(boolean defeated) {
         this.defeated = defeated;
     }
+
+    public int getAmtExposed() { return amtExposed; }
 
     public void die() {
         group.removeActor(this);
@@ -191,6 +201,8 @@ public class LargeShip extends Enemy {
 
         @Override
         public void draw(Batch batch, float parentAlpha) {
+            int amtExposed = parent.getAmtExposed();
+
             spr.setRegion(160, 319, 32, 32);
             spr.setSize(96, 96);
             spr.setPosition(getX(), getY());
@@ -198,22 +210,22 @@ public class LargeShip extends Enemy {
 
             spr.setRegion(128, 319, 16, 16);
             spr.setSize(48, 48);
-            spr.setPosition(getX(), getY() + 48);
+            spr.setPosition(getX() - amtExposed, getY() + 48 + amtExposed);
             spr.draw(batch);
 
             spr.setRegion(144, 319, 16, 16);
             spr.setSize(48, 48);
-            spr.setPosition(getX() + 48, getY() + 48);
+            spr.setPosition(getX() + 48 + amtExposed, getY() + 48 + amtExposed);
             spr.draw(batch);
 
             spr.setRegion(128, 335, 16, 19);
             spr.setSize(48, 57);
-            spr.setPosition(getX(), getY());
+            spr.setPosition(getX() - amtExposed, getY() - amtExposed);
             spr.draw(batch);
 
             spr.setRegion(144, 335, 16, 19);
             spr.setSize(48, 57);
-            spr.setPosition(getX() + 48, getY());
+            spr.setPosition(getX() + 48 + amtExposed, getY() - amtExposed);
             spr.draw(batch);
         }
 

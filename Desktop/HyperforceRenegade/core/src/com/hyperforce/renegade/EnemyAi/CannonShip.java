@@ -24,7 +24,8 @@ public class CannonShip extends Enemy {
             velocity++;
         else if(player.getX() <= getX() && velocity > -maxVelocity)
             velocity--;
-        moveBy(velocity, -0.5f);
+        //moveBy(velocity, -0.5f);
+        moveBy(velocity, 0);
         if((age % 90 == 89 || age % 90 == 84 || age % 90 == 79) && getParent() != null)
             getParent().addActor(new Projectile(getX(), getY() - 24, 36, 36, 270, 24, 0, 24, 2));
         if(age == 270) {
