@@ -122,7 +122,7 @@ public class EyeBlasterBoss extends Enemy {
                 if(explosionDur <= -56) {
                     if(explosionDur >= -64)
                         screenFill.setAlpha(((-1 * explosionDur) - 56) / 8f);
-                    if(explosionDur == -72)
+                    if(explosionDur == -64)
                         Ship.bossDead = true;
                     screenFill.draw(batch);
                 }

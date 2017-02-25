@@ -212,7 +212,7 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 		};
 		title.setPosition(199.5f, 468);
 		Skin skin = new Skin(Gdx.files.internal("UISkin.json"));
-		Label lbl = new Label("CREDIT[S]: 255", skin) {
+		Label lbl = new Label("CREDIT[S]: 255       PRESS ENTER TO START", skin) {
 
 			@Override
 			public void draw(Batch batch, float parentAlpha) {
@@ -269,13 +269,19 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 					setText("BOSS");
 					setColor(Color.RED);
 					if(stage3Ship != null && stage3Ship.isDefeated()) {
-						frames = 2499;
+						frames = (stage3Ship.getFightStage() + 1) * 2500 - 1;
 					}
 				}
 				else if(!Ship.shopping)
 					setText(String.format("%04d.%d km", frames, generator.nextInt(89) + 10));
 				else
 					setText(String.format("%04d.00 km", frames));
+			}
+
+			@Override
+			public void draw(Batch batch, float parentAlpha) {
+				if(frames > 0)
+					super.draw(batch, parentAlpha);
 			}
 		};
 		distanceLbl.setPosition(758 - distanceLbl.getPrefWidth(), 0);
@@ -299,9 +305,14 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 		starLbl.setPosition(700 - distanceLbl.getPrefWidth(), 35);
 		Label shopStarLbl = new Label("x 00", skin) {
 			@Override
-			public void act(float delta) {
-				super.act(delta);
+			public void draw(Batch batch, float parentAlpha) {
 				setText(String.format("x %02d", Ship.stars));
+				super.draw(batch, parentAlpha);
+				setText(String.format("x %02d", shopSel * 10 + 10));
+				moveBy(-24, -243);
+				if(curMenu != 0 || shopSel < 2)
+					super.draw(batch, parentAlpha);
+				moveBy(24, 243);
 			}
 		};
 		shopStarLbl.setPosition(795 - distanceLbl.getPrefWidth(), 728);
@@ -517,8 +528,9 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 					if((frames >= 145 && (frames < 1200 || frames >= 1750) && frames < 4650) && (frames % 60 == 0)) {
 						mainGroup.addActor(new Laser((int)player.getX() + 24, (int)player.getY() + 24));
 					}
-					if(frames >= 5250 && (frames % (35 + Ship.bossHealth) == 0)) {
+					if(Ship.bossHealth > 0 && frames >= 5250 && spawnTimes[2] == 0) {
 						mainGroup.addActor(new Laser((int)player.getX() + 24, (int)player.getY() + 24));
+						spawnTimes[2] = (35 + Ship.bossHealth);
 					}
 					if(frames > 1250 && frames < 3250 && spawnTimes[0] == 0) {
 						mainGroup.addActor(new ShieldShip(generator.nextInt(714), 714 - generator.nextInt(144)));
@@ -550,16 +562,26 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 						if(frames > 10 && frames < 5000 && spawnTimes[0] == 0) {
 							mainGroup.addActor(new CannonShip(generator.nextInt(768), 512 - generator.nextInt(144)));
 							spawnTimes[0] = 175 + generator.nextInt(50);
+							if(frames > 2500)
+								spawnTimes[0] *= 2;
 						}
 						if(frames > 45 && frames < 5000 && spawnTimes[1] == 0) {
 							int ofs = 512 - generator.nextInt(144);
 							mainGroup.addActor(new EyeBlaster(ofs));
 							spawnTimes[1] = 75 + generator.nextInt(100);
+							if(frames > 2500)
+								spawnTimes[1] *= 2;
 						}
 						if(frames > 250 && frames < 5000 && spawnTimes[2] == 0) {
 							int ofs = 512 - generator.nextInt(144);
 							mainGroup.addActor(new MysteryShip(ofs));
 							spawnTimes[2] = 400;
+							if(frames > 2500)
+								spawnTimes[2] *= 1.5f; // Limiting power-ups seems kinda mean
+						}
+						if(frames > 2700 && frames < 5000 && spawnTimes[3] == 0) {
+							mainGroup.addActor(new ShieldShip(generator.nextInt(714), 714 - generator.nextInt(144)));
+							spawnTimes[3] = 400 + generator.nextInt(100);
 						}
 					}
 					if(frames == 450) {

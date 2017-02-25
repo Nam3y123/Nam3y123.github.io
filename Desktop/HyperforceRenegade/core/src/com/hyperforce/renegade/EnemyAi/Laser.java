@@ -14,7 +14,7 @@ public class Laser extends Enemy {
         setBounds(x, y, 0, 0);
         vulnerable = false;
         width = 10;
-        duration = 52;
+        duration = 60;
         vertical = GENERATOR.nextBoolean();
         //vertical = true;
     }

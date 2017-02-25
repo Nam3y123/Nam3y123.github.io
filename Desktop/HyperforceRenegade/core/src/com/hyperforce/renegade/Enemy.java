@@ -5,10 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.hyperforce.renegade.ProjectileAi.BasicLaser;
-import com.hyperforce.renegade.ProjectileAi.Explosion;
-import com.hyperforce.renegade.ProjectileAi.GigaBomb;
-import com.hyperforce.renegade.ProjectileAi.Star;
+import com.hyperforce.renegade.ProjectileAi.*;
 
 import java.util.Random;
 
@@ -85,6 +82,39 @@ public class Enemy extends Actor implements Entity {
                 }
                 Ship.score += 500;
                 getParent().addActor(new Star(getX(), getY()));
+                Enemy.this.remove();
+            }
+        }
+    }
+
+    protected void largeStarOnHit(Entity offender) {
+        if(offender instanceof Ship && player.getInvin() <= 0)
+            ((Ship)offender).setHp(((Ship)offender).getHp() - 1);
+        else if(offender instanceof Projectile && ((Projectile)offender).getDmg() > 0 && invinDur == 0) {
+            Projectile proj = (Projectile)offender;
+            hp -= proj.getDmg();
+            invinDur = 15;
+            long id = Ship.sounds[0].play();
+            Ship.sounds[0].setVolume(id, Ship.volume / 150f);
+            if(hp <= 0) {
+                if(Ship.upgrades[3][4]) {
+                    if(BasicLaser.stacks < 3)
+                        BasicLaser.stacks++;
+                    BasicLaser.stackDur = 180;
+                }
+                if(Ship.upgrades[1][2]) {
+                    Ship.vampirism++;
+                    if(Ship.vampirism == 5) {
+                        Ship.vampirism = 0;
+                        if(player.getHp() < 3)
+                            player.setHp(player.getHp() + 1);
+                    }
+                }
+                if(Ship.upgrades[1][4]) {
+                    group.addActor(new Explosion(getX() + getWidth() / 2, getY() + getHeight() / 2));
+                }
+                Ship.score += 500;
+                getParent().addActor(new LargeStar(getX(), getY()));
                 Enemy.this.remove();
             }
         }

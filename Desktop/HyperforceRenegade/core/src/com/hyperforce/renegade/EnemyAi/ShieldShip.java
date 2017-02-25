@@ -74,6 +74,6 @@ public class ShieldShip extends Enemy {
             Ship.sounds[12].setVolume(id, Ship.volume / 150f);
             ((Projectile) offender).remove();
         } else if(!(offender instanceof ShieldProjectile))
-            super.onHit(offender);
+            super.largeStarOnHit(offender);
     }
 }

@@ -50,7 +50,7 @@ public class Ship extends Actor implements Entity{
         invin = 0;
         shield = 0;
         lives = 2;
-        speed = 12;
+        speed = 10;
         volume = 33;
         vampirism = 0;
         bossHealth = 0;
@@ -131,7 +131,7 @@ public class Ship extends Actor implements Entity{
                 moveBy(-768, 0);
         }
         if(Ship.upgrades[1][0])
-            speed = 16;
+            speed = 15;
         flameAnim = (flameAnim + 1) % 9;
         if(invin > 0)
             invin--;

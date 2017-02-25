@@ -87,6 +87,8 @@ public class LaserBoss extends Enemy {
                 if(explosionDur <= -56) {
                     if(explosionDur >= -64)
                         screenFill.setAlpha(((-1 * explosionDur) - 56) / 8f);
+                    if(explosionDur == -64)
+                        Ship.bossDead = true;
                     screenFill.draw(batch);
                 }
                 if(explosionDur > -64)
@@ -137,6 +139,7 @@ public class LaserBoss extends Enemy {
         Ship.score += 20000;
         Ship.stars += 20;
         dying = true;
+        bigExplosion = false;
         vulnerable = false;
         MainClass.soundtrack[MainClass.songPlaying].stop();
         Timer.schedule(new Timer.Task() {

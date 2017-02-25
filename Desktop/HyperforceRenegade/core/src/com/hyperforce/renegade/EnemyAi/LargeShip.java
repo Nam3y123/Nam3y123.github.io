@@ -9,6 +9,7 @@ import com.hyperforce.renegade.Enemy;
 import com.hyperforce.renegade.Entity;
 import com.hyperforce.renegade.Projectile;
 import com.hyperforce.renegade.ProjectileAi.BasicLaser;
+import com.hyperforce.renegade.Ship;
 import com.sun.istack.internal.NotNull;
 
 import static com.hyperforce.renegade.Projectile.group;
@@ -54,19 +55,43 @@ public class LargeShip extends Enemy {
     @Override
     public void act(float delta) {
         if(stage == 1)
-            super.act(delta * (float)(Math.sin(age / 30f) + 1.5f));
+            super.act(delta * (float)(0.5f * Math.sin(age / 30f) + 1f));
         else
             super.act(delta);
-        if(age % 120 == 100)
-            for(SmallTurret t : turrets)
+        if(age % 120 == 100) {
+            boolean turretIntact = false;
+            for(SmallTurret t : turrets) {
                 t.prepareFireAnim();
-        if(age % 120 == 0 && age > 0)
-            for(SmallTurret t : turrets)
+                if(t.alive)
+                    turretIntact = true;
+            }
+            if(turretIntact) {
+                long id = Ship.sounds[3].play();
+                Ship.sounds[3].setVolume(id, Ship.volume / 100f);
+                Ship.sounds[3].setPitch(id, 0.75f);
+            }
+
+        }
+        if(age % 120 == 0 && age > 0) {
+            boolean turretIntact = false;
+            for(SmallTurret t : turrets) {
                 t.fire();
+                if(t.alive)
+                    turretIntact = true;
+            }
+            if(turretIntact) {
+                long id = Ship.sounds[5].play();
+                Ship.sounds[5].setVolume(id, Ship.volume / 100f);
+            }
+        }
         boolean moving = !(oldX == getX() && oldY == getY());
-        if(!bossFight && (lastRedirection <= 0 || !moving)) {
+        if(!defeated && (!bossFight || stage > 0) && (lastRedirection <= 0 || !moving)) {
             int x = GENERATOR.nextInt(1536) - 384;
             int y = GENERATOR.nextInt(1536) - 384;
+            if(bossFight) {
+                x = GENERATOR.nextInt(768) - 192;
+                y = GENERATOR.nextInt(768) - 192;
+            }
             Array<Action> actionses = new Array<>(getActions()); // This name is dumb and I love it
             for(Action a : actionses)
                 if(a instanceof MoveToAction)
@@ -76,9 +101,11 @@ public class LargeShip extends Enemy {
         }
         if(lastRedirection > 0)
             lastRedirection--;
-        for(SmallTurret t : turrets)
-            t.moveBy(getX() - oldX, getY() - oldY);
-        core.moveBy(getX() - oldX, getY() - oldY);
+        if(!defeated) {
+            for(SmallTurret t : turrets)
+                t.moveBy(getX() - oldX, getY() - oldY);
+            core.moveBy(getX() - oldX, getY() - oldY);
+        }
         oldX = getX();
         oldY = getY();
     }
@@ -111,6 +138,8 @@ public class LargeShip extends Enemy {
     }
 
     public int getAmtExposed() { return amtExposed; }
+
+    public int getFightStage() { return stage; }
 
     public void die() {
         group.removeActor(this);
