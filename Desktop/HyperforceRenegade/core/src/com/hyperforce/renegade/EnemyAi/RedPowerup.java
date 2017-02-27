@@ -21,7 +21,7 @@ public class RedPowerup extends Enemy {
             getParent().addActor(new Projectile(getX() + 3, getY() + 24, 9, 18, 90, 24, 244, 0, 1) {
                 @Override
                 public void onHit(Entity offender) {
-                    if(offender instanceof Enemy)
+                    if(offender instanceof Enemy && ((Enemy)offender).getVulnerable())
                         ((Enemy) offender).setInvinDur(1);
                     super.onHit(offender);
                 }

@@ -90,7 +90,7 @@ public class Enemy extends Actor implements Entity {
     protected void largeStarOnHit(Entity offender) {
         if(offender instanceof Ship && player.getInvin() <= 0)
             ((Ship)offender).setHp(((Ship)offender).getHp() - 1);
-        else if(offender instanceof Projectile && ((Projectile)offender).getDmg() > 0 && invinDur == 0) {
+        else if(offender instanceof Projectile && ((Projectile)offender).getDmg() > 0 && invinDur == 0 && vulnerable) {
             Projectile proj = (Projectile)offender;
             hp -= proj.getDmg();
             invinDur = 15;

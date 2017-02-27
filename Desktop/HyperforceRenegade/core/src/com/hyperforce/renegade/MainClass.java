@@ -25,6 +25,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.SnapshotArray;
 import com.hyperforce.renegade.EnemyAi.*;
@@ -36,7 +37,7 @@ import java.util.Random;
 
 public class MainClass extends ApplicationAdapter implements InputProcessor, ControllerListener {
 	private Stage curStage; // The stage currently being drawn
-	private Stage mainGame, shop;
+	private Stage mainGame, shop, menu;
 	private Ship player;
 	private boolean[] btnDown;
 	private int frames;
@@ -54,6 +55,7 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 	public static int songPlaying;
 	private LargeShip stage3Ship;
 	private boolean gameStart;
+	private boolean optionSel;
 
 	private final Random generator = new Random();
 
@@ -68,6 +70,14 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 			}
 		};
 		shop = new Stage() {
+			@Override
+			public void dispose() {
+				for(int i = 0; i < getActors().size; i++)
+					getActors().get(i).remove();
+				super.dispose();
+			}
+		};
+		menu = new Stage() {
 			@Override
 			public void dispose() {
 				for(int i = 0; i < getActors().size; i++)
@@ -96,6 +106,7 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 		Ship.shopping = false;
 		gameStart = false;
 		Ship.bossDead = false;
+		optionSel = false;
 
 		soundtrack = new Music[3];
 		soundtrack[0] = Gdx.audio.newMusic(Gdx.files.internal("SFX/Music/StageTheme1.mp3"));
@@ -222,7 +233,7 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 
 			@Override
 			public void act(float delta) {
-				if(mainGroup.getChildren().contains(player, true))
+				if(optionSel)
 					remove();
 			}
 		};
@@ -230,10 +241,19 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 		Label highScoreLbl = new Label("", skin) {
 			@Override
 			public void act(float delta) {
-				if(mainGroup.getChildren().contains(player, true))
+				if(optionSel)
 					remove();
 			}
 		};
+		Label options = new Label("1P START \n2P START \nEXIT", skin) {
+			@Override
+			public void act(float delta) {
+				super.act(delta);
+				setVisible(optionSel);
+			}
+		};
+		options.setPosition(384 - options.getWidth() / 2, 192);
+		options.setVisible(false);
 
 		BufferedReader reader = Gdx.files.internal("HighScores.score").reader(8192);
 		java.lang.StringBuilder builder = new java.lang.StringBuilder();
@@ -254,7 +274,7 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 			builder.append("\n");
 		}
 		highScoreLbl.setText(builder.toString());
-		highScoreLbl.setPosition(768 / 2f - lbl.getPrefWidth() / 2f, 324);
+		highScoreLbl.setPosition(384 - highScoreLbl.getPrefWidth() / 2f, 324);
 
 		Label distanceLbl = new Label("0000.00 km", skin) {
 			@Override
@@ -328,6 +348,7 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 			}
 		}); // Supernova explosion
 		//mainGroup.addActor(player);
+		HUDGroup.addActor(options);
 		HUDGroup.addActor(HUD);
 		HUDGroup.addActor(lbl);
 		HUDGroup.addActor(distanceLbl);
@@ -353,9 +374,11 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 				}
 			}
 		});
-		mainGroup.addActor(HUDGroup);
+		//mainGroup.addActor(HUDGroup);
 		mainGame.addActor(mainGroup);
 		Projectile.group = mainGroup;
+		menu.addActor(background);
+		menu.addActor(HUDGroup);
 
 		Actor storefront = new Actor() {
 			private final Sprite store = new Sprite(new Texture(Gdx.files.internal("Storefront.png")));
@@ -442,7 +465,7 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 		shop.addActor(storeLbl);
 		shop.addActor(shopStarLbl);
 
-		curStage = mainGame;
+		curStage = menu;
 
 		InputMultiplexer im = new InputMultiplexer(curStage, this);
 		Gdx.input.setInputProcessor(im);
@@ -453,7 +476,7 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 	public void render () {
 		if(supernova == 0)
 			curStage.act(Gdx.graphics.getDeltaTime());
-		if(curStage == mainGame)
+		if(curStage != shop)
 			Gdx.gl.glClearColor(0.125f, 0, 0.125f, 1);
 		else
 			Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -566,7 +589,7 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 								spawnTimes[0] *= 2;
 						}
 						if(frames > 45 && frames < 5000 && spawnTimes[1] == 0) {
-							int ofs = 512 - generator.nextInt(144);
+							int ofs = 720 - generator.nextInt(72);
 							mainGroup.addActor(new EyeBlaster(ofs));
 							spawnTimes[1] = 75 + generator.nextInt(100);
 							if(frames > 2500)
@@ -585,10 +608,13 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 						}
 					}
 					if(frames == 450) {
-						stage3Ship = new LargeShip(192, 1152, 0); // LargeShip adds itself to the group
+						stage3Ship = new LargeShip(192, 768, 0); // LargeShip adds itself to the group
 					}
 					if(frames == 2700 && stage3Ship == null) {
-						stage3Ship = new LargeShip(192, 1152, 1); // Stage 2: Moves more erratically
+						stage3Ship = new LargeShip(192, 768, 1); // Stage 2: Moves more erratically
+					}
+					if(frames == 5150 && stage3Ship == null) {
+						stage3Ship = new LargeShip(192, 768, 2); // Stage 2: Moves more erratically
 					}
 			}
 
@@ -681,7 +707,7 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 			}
 		}
 
-		if(mainGroup.getChildren().get(mainGroup.getChildren().size - 1) != HUDGroup) { // If the HUD isn't the last thing drawn
+		if(curStage == mainGame && mainGroup.getChildren().get(mainGroup.getChildren().size - 1) != HUDGroup) { // If the HUD isn't the last thing drawn
 			mainGroup.removeActor(HUDGroup);
 			mainGroup.addActor(HUDGroup); // Remove & re-add the HUD, making it the last thing drawn
 		}
@@ -824,7 +850,14 @@ public class MainClass extends ApplicationAdapter implements InputProcessor, Con
 				btnDown[5] = true;
 				return true;
 			case Input.Keys.ENTER:
-				if(!mainGroup.getChildren().contains(player, false)) {
+				if(!optionSel) {
+					optionSel = true;
+
+					break;
+				} if(!mainGroup.getChildren().contains(player, false)) {
+					curStage = mainGame;
+					mainGroup.addActorAt(0, menu.getActors().get(0));
+					mainGroup.addActor(HUDGroup);
 					for(Actor a : mainGroup.getChildren())
 						if(a instanceof Enemy || a instanceof Projectile)
 							a.addAction(Actions.moveBy(0, -768, 1f));
